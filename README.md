@@ -6,6 +6,12 @@ This is a clone from [sensepost/objection](https://github.com/sensepost/objectio
 1. Clone to local directory
 2. Run command `pip3 install --editable <path_to_objection>`
 
+
+1. Clone objection with `git clone https://github.com/dizparc-secured/objection.git`
+2. Install objection with `pip3 install --editable .` from the cloned directory.
+3. Install agent dependencies with `npm install` in the `agent` directory.
+4. Compile the agent with `npm run build` in the `agent` directory.
+
   
 
 <br>
