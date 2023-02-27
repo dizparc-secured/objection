@@ -5,51 +5,54 @@ import {
 } from "./lib/libjava";
 import { ClipboardManager } from "./lib/types";
 
-export const monitor = (): Promise<void> => {
-  // -- Sample Java
-  //
-  // ClipboardManager f = (ClipboardManager)getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
-  // ClipData.Item i = f.getPrimaryClip().getItemAt(0);
-  // Log.e("t", "?:" + i.getText());
+export namespace clipboard {
 
-  send(`${c.yellowBright("Warning!")} This module is still broken. A pull request fixing it would be awesome!`);
+  export const monitor = (): Promise<void> => {
+    // -- Sample Java
+    //
+    // ClipboardManager f = (ClipboardManager)getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
+    // ClipData.Item i = f.getPrimaryClip().getItemAt(0);
+    // Log.e("t", "?:" + i.getText());
 
-  // https://developer.android.com/reference/android/content/Context.html#CLIPBOARD_SERVICE
-  const CLIPBOARD_SERVICE: string = "clipboard";
+    send(`${c.yellowBright("Warning!")} This module is still broken. A pull request fixing it would be awesome!`);
 
-  // a variable for clipboard text
-  let data: string;
+    // https://developer.android.com/reference/android/content/Context.html#CLIPBOARD_SERVICE
+    const CLIPBOARD_SERVICE: string = "clipboard";
 
-  return wrapJavaPerform(() => {
+    // a variable for clipboard text
+    let data: string;
 
-    const clipboardManager: ClipboardManager = Java.use("android.content.ClipboardManager");
-    const context = getApplicationContext();
-    const clipboardHandle = context.getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
-    const cp = Java.cast(clipboardHandle, clipboardManager);
+    return wrapJavaPerform(() => {
 
-    setInterval(() => {
+      const clipboardManager: ClipboardManager = Java.use("android.content.ClipboardManager");
+      const context = getApplicationContext();
+      const clipboardHandle = context.getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
+      const cp = Java.cast(clipboardHandle, clipboardManager);
 
-      const primaryClip = cp.getPrimaryClip();
+      setInterval(() => {
 
-      // Check if there is at least some data
-      if (primaryClip == null || primaryClip.getItemCount() <= 0) {
-        return;
-      }
+        const primaryClip = cp.getPrimaryClip();
 
-      // If we have managed to get the primary clipboard and there are
-      // items stored in it, process an update.
-      const currentString = primaryClip.getItemAt(0).coerceToText(context).toString();
+        // Check if there is at least some data
+        if (primaryClip == null || primaryClip.getItemCount() <= 0) {
+          return;
+        }
 
-      // If the data is the same, just stop.
-      if (data === currentString) {
-        return;
-      }
+        // If we have managed to get the primary clipboard and there are
+        // items stored in it, process an update.
+        const currentString = primaryClip.getItemAt(0).coerceToText(context).toString();
 
-      // Update the data with the new string and report back.
-      data = currentString;
+        // If the data is the same, just stop.
+        if (data === currentString) {
+          return;
+        }
 
-      send(`${c.blackBright(`[pasteboard-monitor]`)} Data: ${c.greenBright(data.toString())}`);
+        // Update the data with the new string and report back.
+        data = currentString;
 
-    }, 1000 * 5);
-  });
-};
+        send(`${c.blackBright(`[pasteboard-monitor]`)} Data: ${c.greenBright(data.toString())}`);
+
+      }, 1000 * 5);
+    });
+  };
+}

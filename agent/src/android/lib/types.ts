@@ -1,7 +1,5 @@
 export type JavaClass = any;
 
-export type JavaMethodsOverloadsResult = any;
-
 export type ClipboardManager = JavaClass | any;
 export type File = JavaClass | any;
 export type Throwable = JavaClass | any;

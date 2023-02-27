@@ -10,149 +10,152 @@ import {
   JavaClass
 } from "./lib/types";
 
-export const exists = (path: string): Promise<boolean> => {
-  // -- Sample Java
-  //
-  // File path = new File(".");
-  // Boolean e = path.exists();
+export namespace androidfilesystem {
 
-  return wrapJavaPerform(() => {
-    const file: File = Java.use("java.io.File");
-    const currentFile: JavaClass = file.$new(path);
+  export const exists = (path: string): Promise<boolean> => {
+    // -- Sample Java
+    //
+    // File path = new File(".");
+    // Boolean e = path.exists();
 
-    return currentFile.exists();
-  });
-};
+    return wrapJavaPerform(() => {
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-export const readable = (path: string): Promise<boolean> => {
-  // -- Sample Java Code
-  //
-  // File d = new File(".");
-  // d.canRead();
+      return currentFile.exists();
+    });
+  };
 
-  return wrapJavaPerform(() => {
-    const file: File = Java.use("java.io.File");
-    const currentFile: JavaClass = file.$new(path);
+  export const readable = (path: string): Promise<boolean> => {
+    // -- Sample Java Code
+    //
+    // File d = new File(".");
+    // d.canRead();
 
-    return currentFile.canRead();
-  });
-};
+    return wrapJavaPerform(() => {
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-export const writable = (path: string): Promise<boolean> => {
-  // -- Sample Java Code
-  //
-  // File d = new File(".");
-  // d.canWrite();
+      return currentFile.canRead();
+    });
+  };
 
-  return wrapJavaPerform(() => {
-    const file: File = Java.use("java.io.File");
-    const currentFile: JavaClass = file.$new(path);
+  export const writable = (path: string): Promise<boolean> => {
+    // -- Sample Java Code
+    //
+    // File d = new File(".");
+    // d.canWrite();
 
-    return currentFile.canWrite();
-  });
-};
+    return wrapJavaPerform(() => {
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-export const pathIsFile = (path: string): Promise<boolean> => {
-  // -- Sample Java Code
-  //
-  // File d = new File(".");
-  // d.isFile();
+      return currentFile.canWrite();
+    });
+  };
 
-  return wrapJavaPerform(() => {
-    const file: File = Java.use("java.io.File");
-    const currentFile: JavaClass = file.$new(path);
+  export const pathIsFile = (path: string): Promise<boolean> => {
+    // -- Sample Java Code
+    //
+    // File d = new File(".");
+    // d.isFile();
 
-    return currentFile.isFile();
-  });
-};
+    return wrapJavaPerform(() => {
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-export const pwd = (): Promise<string> => {
-  // -- Sample Java
-  //
-  // getApplicationContext().getFilesDir().getAbsolutePath()
+      return currentFile.isFile();
+    });
+  };
 
-  return wrapJavaPerform(() => {
-    const context = getApplicationContext();
-    return context.getFilesDir().getAbsolutePath().toString();
-  });
-};
+  export const pwd = (): Promise<string> => {
+    // -- Sample Java
+    //
+    // getApplicationContext().getFilesDir().getAbsolutePath()
 
-// heavy lifting is done in frida-fs here.
-export const readFile = (path: string): Buffer => {
-  return fs.readFileSync(path);
-};
+    return wrapJavaPerform(() => {
+      const context = getApplicationContext();
+      return context.getFilesDir().getAbsolutePath().toString();
+    });
+  };
 
-// heavy lifting is done in frida-fs here.
-export const writeFile = (path: string, data: string): void => {
-  const writeStream: any = fs.createWriteStream(path);
+  // heavy lifting is done in frida-fs here.
+  export const readFile = (path: string): Buffer => {
+    return fs.readFileSync(path);
+  };
 
-  writeStream.on("error", (error: Error) => {
-    throw error;
-  });
+  // heavy lifting is done in frida-fs here.
+  export const writeFile = (path: string, data: string): void => {
+    const writeStream: any = fs.createWriteStream(path);
 
-  writeStream.write(hexStringToBytes(data));
-  writeStream.end();
-};
+    writeStream.on("error", (error: Error) => {
+      throw error;
+    });
 
-export const deleteFile = (path: string): Promise<boolean> => {
-  // -- Sample Java Code
-  //
-  // File d = new File(".");
-  // d.delete();
+    writeStream.write(hexStringToBytes(data));
+    writeStream.end();
+  };
 
-  return wrapJavaPerform(() => {
-    const file: File = Java.use("java.io.File");
-    const currentFile: JavaClass = file.$new(path);
+  export const deleteFile = (path: string): Promise<boolean> => {
+    // -- Sample Java Code
+    //
+    // File d = new File(".");
+    // d.delete();
 
-    return currentFile.delete();
-  });
-};
+    return wrapJavaPerform(() => {
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-export const ls = (p: string): Promise<IAndroidFilesystem> => {
-  // -- Sample Java Code
-  //
-  // File d = new File(".");
-  // File[] files = d.listFiles();
-  // Log.e(getClass().getName(), "Files: " + files.length);
-  // for (int i = 0; i < files.length; i++) {
-  //     Log.e(getClass().getName(),
-  //             files[i].getName() + ": " + files[i].canRead()
-  //             + " " + files[i].lastModified()
-  //             + " " + files[i].length()
-  //     );
-  // }
+      return currentFile.delete();
+    });
+  };
 
-  return wrapJavaPerform(() => {
-    const file: File = Java.use("java.io.File");
-    const directory: JavaClass = file.$new(p);
+  export const ls = (p: string): Promise<IAndroidFilesystem> => {
+    // -- Sample Java Code
+    //
+    // File d = new File(".");
+    // File[] files = d.listFiles();
+    // Log.e(getClass().getName(), "Files: " + files.length);
+    // for (int i = 0; i < files.length; i++) {
+    //     Log.e(getClass().getName(),
+    //             files[i].getName() + ": " + files[i].canRead()
+    //             + " " + files[i].lastModified()
+    //             + " " + files[i].length()
+    //     );
+    // }
 
-    const response: IAndroidFilesystem = {
-      files: {},
-      path: p,
-      readable: directory.canRead(),
-      writable: directory.canWrite(),
-    };
+    return wrapJavaPerform(() => {
+      const file: File = Java.use("java.io.File");
+      const directory: JavaClass = file.$new(p);
 
-    if (!response.readable) { return response; }
-
-    // get a listing of the files in the directory
-    const files: any[] = directory.listFiles();
-
-    for (const f of files) {
-      response.files[f.getName()] = {
-        attributes: {
-          isDirectory: f.isDirectory(),
-          isFile: f.isFile(),
-          isHidden: f.isHidden(),
-          lastModified: f.lastModified(),
-          size: f.length(),
-        },
-        fileName: f.getName(),
-        readable: f.canRead(),
-        writable: f.canWrite(),
+      const response: IAndroidFilesystem = {
+        files: {},
+        path: p,
+        readable: directory.canRead(),
+        writable: directory.canWrite(),
       };
-    }
 
-    return response;
-  });
-};
+      if (!response.readable) { return response; }
+
+      // get a listing of the files in the directory
+      const files: any[] = directory.listFiles();
+
+      for (const f of files) {
+        response.files[f.getName()] = {
+          attributes: {
+            isDirectory: f.isDirectory(),
+            isFile: f.isFile(),
+            isHidden: f.isHidden(),
+            lastModified: f.lastModified(),
+            size: f.length(),
+          },
+          fileName: f.getName(),
+          readable: f.canRead(),
+          writable: f.canWrite(),
+        };
+      }
+
+      return response;
+    });
+  };
+}

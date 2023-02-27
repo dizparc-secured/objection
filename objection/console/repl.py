@@ -11,9 +11,11 @@ from prompt_toolkit.completion import FuzzyCompleter
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.styles import Style
 
+from objection.utils.agent import Agent
 from .commands import COMMANDS
 from .completer import CommandCompleter
 from ..__init__ import __version__
+from ..commands.device import get_device_info
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.helpers import get_tokens
@@ -26,6 +28,7 @@ class Repl(object):
 
     def __init__(self) -> None:
         self.cli = None
+        self.prompt_tokens = []
 
         self.completer = FuzzyCompleter(CommandCompleter())
         self.commands_repository = COMMANDS
@@ -65,16 +68,31 @@ class Repl(object):
 
             # Prompt.
             'applicationname': '#007cff',
-            'status': '#717171',
             'on': '#00aa00',
             'devicetype': '#00ff48',
             'version': '#00ff48',
-            'jobs': '',  # TODO
             'connection': '#717171'
         })
 
-    @staticmethod
-    def get_prompt_message() -> list:
+    def set_prompt_tokens(self, device_info: tuple) -> None:
+        """
+            Set prompt tokens sourced from a command.device.device_info()
+            call.
+
+            :param device_info:
+            :return:
+        """
+        device_name, system_name, model, system_version = device_info
+
+        self.prompt_tokens = [
+            ('class:applicationname', device_name),
+            ('class:on', ' on '),
+            ('class:devicetype', '(' + model + ': '),
+            ('class:version', system_version + ') '),
+            ('class:connection', '[' + state_connection.get_comms_type_string() + '] # '),
+        ]
+
+    def get_prompt_message(self) -> list:
         """
             Return prompt tokens to use in the cli app.
 
@@ -84,17 +102,15 @@ class Repl(object):
             :return:
         """
 
-        agent = state_connection.agent
-        dev = state_connection.get_agent().device
-        params = dev.query_system_parameters()
+        if self.prompt_tokens:
+            return self.prompt_tokens
 
         return [
-            ('class:applicationname', state_connection.name),
-            ('class:status', ' (' + ('run' if agent.resumed else 'pause') + ')'),
-            ('class:on', ' on '),
-            ('class:devicetype', '(' + params['os']['name'] + ': '),
-            ('class:version', params['os']['version'] + ') '),
-            ('class:connection', '[' + dev.type + '] # '),
+            ('class:applicationname', 'unknown application'),
+            ('class:on', ''),
+            ('class:devicetype', ''),
+            ('class:version', ' '),
+            ('class:connection', '[' + state_connection.get_comms_type_string() + '] # '),
         ]
 
     def run_command(self, document: str) -> None:
@@ -278,8 +294,7 @@ class Repl(object):
 
         return user_help
 
-    @staticmethod
-    def handle_reconnect(document: str) -> bool:
+    def handle_reconnect(self, document: str) -> bool:
         """
             Handles a reconnection attempt to a device.
 
@@ -295,13 +310,13 @@ class Repl(object):
             click.secho('Reconnecting...', dim=True)
 
             try:
-                # TODO
-                # state_connection.a.unload()
-                #
-                # agent = OldAgent()
-                # agent.inject()
-                # state_connection.a = agent
+                state_connection.agent.unload()
 
+                agent = Agent()
+                agent.inject()
+                state_connection.agent = agent
+
+                self.set_prompt_tokens(get_device_info())
                 click.secho('Reconnection successful!', fg='green')
 
             except (frida.ServerNotRunningError, frida.TimedOutError) as e:
@@ -311,7 +326,7 @@ class Repl(object):
 
         return False
 
-    def run(self, quiet: bool) -> None:
+    def start_repl(self, quiet: bool) -> None:
         """
             Start the objection repl.
         """
@@ -343,11 +358,6 @@ class Repl(object):
                 if document.strip() in ('quit', 'exit', 'bye'):
                     click.secho('Exiting...', dim=True)
                     break
-
-                if document.strip() in ('resume', 'res'):
-                    click.secho('Resuming attached process', dim=True)
-                    state_connection.agent.resume()
-                    continue
 
                 # if we got the reconnect command, handle just that
                 if self.handle_reconnect(document):

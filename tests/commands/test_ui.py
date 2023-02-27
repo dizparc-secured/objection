@@ -9,11 +9,11 @@ from ..helpers import capture
 
 class TestUI(unittest.TestCase):
     def tearDown(self):
-        device_state.platform = None
+        device_state.device_type = None
 
     @mock.patch('objection.commands.ui._alert_ios')
     def test_alert_helper_method_proxy_calls_ios(self, mock_alert_ios):
-        device_state.platform = Ios()
+        device_state.device_type = Ios()
 
         alert([])
 
@@ -21,7 +21,7 @@ class TestUI(unittest.TestCase):
 
     @mock.patch('objection.commands.ui._alert_ios')
     def test_alert_helper_method_proxy_calls_ios_custom_message(self, mock_alert_ios):
-        device_state.platform = Ios()
+        device_state.device_type = Ios()
 
         alert(['foo'])
 

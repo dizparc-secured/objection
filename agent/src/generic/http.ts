@@ -3,16 +3,17 @@ import * as httpLib from "http";
 import * as url from "url";
 import { colors as c } from "../lib/color";
 
-let httpServer: httpLib.Server;
-let listenPort: number;
-let servePath: string;
+export namespace http {
+  let httpServer: httpLib.Server;
+  let listenPort: number;
+  let servePath: string;
 
-const log = (m: string): void => {
-  c.log(`[http server] ${m}`);
-};
+  const log = (m: string): void => {
+    c.log(`[http server] ${m}`);
+  };
 
-const dirListingHTML = (p: string): string => {
-  let h = `
+  const dirListingHTML = (p: string): string => {
+    let h = `
     <html>
       <body>
         <h2>Index Of /</h2>
@@ -21,66 +22,67 @@ const dirListingHTML = (p: string): string => {
     </html>
     `;
 
-  h = h.replace(`{file_listing}`, () => {
-    return fs.readdirSync(p).map((f) => {
-      return `<a href="${f}">${f}</a>`;
-    }).join("<br>");
-  });
+    h = h.replace(`{file_listing}`, () => {
+      return fs.readdirSync(p).map((f) => {
+        return `<a href="${f}">${f}</a>`;
+      }).join("<br>");
+    });
 
-  return h;
-};
+    return h;
+  };
 
-export const start = (pwd: string, port: number = 9000): void => {
-  if (httpServer) {
-    log(c.redBright(`Server appears to already be running`));
-    return;
-  }
-
-  if (!pwd.endsWith("/")) {
-    pwd = pwd + "/";
-  }
-  log(`${c.blackBright(`Starting HTTP server in: ${pwd}`)}`);
-  servePath = pwd;
-
-  httpServer = httpLib.createServer((req, res) => {
-    log(`${c.greenBright(req.method)} ${req.url}`);
-
-    const parsedUrl = url.parse(req.url);
-
-    if (parsedUrl.path === "/") {
-      res.end(dirListingHTML(pwd));
+  export const start = (pwd: string, port: number = 9000): void => {
+    if (httpServer) {
+      log(c.redBright(`Server appears to already be running`));
       return;
     }
 
-    res.setHeader("Content-type", "application/octet-stream");
-    res.end(fs.readFileSync(pwd + parsedUrl.path));
-  });
+    if (!pwd.endsWith("/")) {
+      pwd = pwd + "/";
+    }
+    log(`${c.blackBright(`Starting HTTP server in: ${pwd}`)}`);
+    servePath = pwd;
 
-  httpServer.listen(port);
-  listenPort = port;
-};
+    httpServer = httpLib.createServer((req, res) => {
+      log(`${c.greenBright(req.method)} ${req.url}`);
 
-export const stop = (): void => {
-  if (!httpServer) {
-    log(c.yellowBright(`Server does not appear to be running.`));
-    return;
-  }
+      const parsedUrl = url.parse(req.url);
 
-  log(c.blackBright(`Waiting for client connections to close then stopping...`));
-  httpServer.close()
-    .once("close", () => {
-      log(c.blackBright(`Server closed.`));
+      if (parsedUrl.path === "/") {
+        res.end(dirListingHTML(pwd));
+        return;
+      }
 
-      httpServer = undefined;
+      res.setHeader("Content-type", "application/octet-stream");
+      res.end(fs.readFileSync(pwd + parsedUrl.path));
     });
-};
 
-export const status = (): void => {
-  if (httpServer) {
-    log(`Server is running on port ` +
-      `${c.greenBright(listenPort.toString())} serving ${c.greenBright(servePath)}`);
-    return;
-  }
+    httpServer.listen(port);
+    listenPort = port;
+  };
 
-  log(c.yellowBright(`Server does not appear to be running.`));
-};
+  export const stop = (): void => {
+    if (!httpServer) {
+      log(c.yellowBright(`Server does not appear to be running.`));
+      return;
+    }
+
+    log(c.blackBright(`Waiting for client connections to close then stopping...`));
+    httpServer.close()
+      .once("close", () => {
+        log(c.blackBright(`Server closed.`));
+
+        httpServer = undefined;
+      });
+  };
+
+  export const status = (): void => {
+    if (httpServer) {
+      log(`Server is running on port ` +
+        `${c.greenBright(listenPort.toString())} serving ${c.greenBright(servePath)}`);
+      return;
+    }
+
+    log(c.yellowBright(`Server does not appear to be running.`));
+  };
+}
