@@ -1,3 +1,30 @@
+# Dizparc:
+
+This is a clone from [sensepost/objection](https://github.com/sensepost/objection) with bumped Frida version (currently 16.0.10)
+
+### Installation
+1. Clone to local directory
+2. Run command `pip3 install --editable <path_to_objection>`
+
+  
+
+<br>
+<br>
+<br>
+    
+
+***
+
+<br>
+<br>
+<br>
+
+
+
+
+
+
+
 # 📱objection - Runtime Mobile Exploration
 
 `objection` is a runtime mobile exploration toolkit, powered by [Frida](https://www.frida.re/), built to help you assess the security posture of your mobile applications, without needing a jailbreak.

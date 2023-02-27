@@ -1,5 +1,5 @@
-frida==16.0.9
-frida-tools>=12.1.0
+frida==16.0.10
+frida-tools>=12.1.1
 prompt_toolkit>=3.0.3,<4.0.0
 click
 tabulate
